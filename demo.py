@@ -24,16 +24,7 @@ from graspnet_dataset import GraspNetDataset
 from collision_detector import ModelFreeCollisionDetector
 from data_utils import CameraInfo, create_point_cloud_from_depth_image
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--checkpoint_path', required=True, help='Model checkpoint path')
-parser.add_argument('--num_point', type=int, default=20000, help='Point Number [default: 20000]')
-parser.add_argument('--num_view', type=int, default=300, help='View Number [default: 300]')
-parser.add_argument('--collision_thresh', type=float, default=0.01, help='Collision Threshold in collision detection [default: 0.01]')
-parser.add_argument('--voxel_size', type=float, default=0.01, help='Voxel Size to process point clouds before collision detection [default: 0.01]')
-cfgs = parser.parse_args()
-
-
-def get_net():
+def get_net(cfgs):
     # Init the model
     net = GraspNet(input_feature_dim=0, num_view=cfgs.num_view, num_angle=12, num_depth=4,
             cylinder_radius=0.05, hmin=-0.02, hmax_list=[0.01,0.02,0.03,0.04], is_training=False)
@@ -48,17 +39,23 @@ def get_net():
     net.eval()
     return net
 
-def get_and_process_data(data_dir):
-    # load data
+def get_data(data_dir):
     color = np.array(Image.open(os.path.join(data_dir, 'color.png')), dtype=np.float32) / 255.0
     depth = np.array(Image.open(os.path.join(data_dir, 'depth.png')))
     workspace_mask = np.array(Image.open(os.path.join(data_dir, 'workspace_mask.png')))
+    return color, depth, workspace_mask
+
+def get_and_process_data(cfgs, color, depth, workspace_mask):
+    data_dir = cfgs.data_dir
+
+    # load data
     meta = scio.loadmat(os.path.join(data_dir, 'meta.mat'))
     intrinsic = meta['intrinsic_matrix']
     factor_depth = meta['factor_depth']
 
     # generate cloud
-    camera = CameraInfo(1280.0, 720.0, intrinsic[0][0], intrinsic[1][1], intrinsic[0][2], intrinsic[1][2], factor_depth)
+    height, width = depth.shape
+    camera = CameraInfo(float(width), float(height), intrinsic[0][0], intrinsic[1][1], intrinsic[0][2], intrinsic[1][2], factor_depth)
     cloud = create_point_cloud_from_depth_image(depth, camera, organized=True)
 
     # get valid points
@@ -98,7 +95,7 @@ def get_grasps(net, end_points):
     gg = GraspGroup(gg_array)
     return gg
 
-def collision_detection(gg, cloud):
+def collision_detection(gg, cloud, cfgs):
     mfcdetector = ModelFreeCollisionDetector(cloud, voxel_size=cfgs.voxel_size)
     collision_mask = mfcdetector.detect(gg, approach_dist=0.05, collision_thresh=cfgs.collision_thresh)
     gg = gg[~collision_mask]
@@ -111,14 +108,26 @@ def vis_grasps(gg, cloud):
     grippers = gg.to_open3d_geometry_list()
     o3d.visualization.draw_geometries([cloud, *grippers])
 
-def demo(data_dir):
-    net = get_net()
-    end_points, cloud = get_and_process_data(data_dir)
+def demo(cfgs):
+    net = get_net(cfgs)
+    color, depth, workspace_mask = get_data(cfgs.data_dir)
+    end_points, cloud = get_and_process_data(cfgs, color, depth, workspace_mask)
     gg = get_grasps(net, end_points)
     if cfgs.collision_thresh > 0:
-        gg = collision_detection(gg, np.array(cloud.points))
+        gg = collision_detection(gg, np.array(cloud.points), cfgs=cfgs)
+    import pdb; pdb.set_trace()
     vis_grasps(gg, cloud)
 
 if __name__=='__main__':
-    data_dir = 'doc/example_data'
-    demo(data_dir)
+    data_dir = os.path.join(ROOT_DIR, 'doc/example_data')
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--checkpoint_path', required=True, help='Model checkpoint path')
+    parser.add_argument('--data_dir', type=str, default=data_dir, help='Data directory')
+    parser.add_argument('--num_point', type=int, default=20000, help='Point Number [default: 20000]')
+    parser.add_argument('--num_view', type=int, default=300, help='View Number [default: 300]')
+    parser.add_argument('--collision_thresh', type=float, default=0.01, help='Collision Threshold in collision detection [default: 0.01]')
+    parser.add_argument('--voxel_size', type=float, default=0.01, help='Voxel Size to process point clouds before collision detection [default: 0.01]')
+    cfgs = parser.parse_args()
+
+    demo(cfgs=cfgs)
