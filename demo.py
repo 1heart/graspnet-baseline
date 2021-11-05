@@ -43,16 +43,13 @@ def get_data(data_dir):
     color = np.array(Image.open(os.path.join(data_dir, 'color.png')), dtype=np.float32) / 255.0
     depth = np.array(Image.open(os.path.join(data_dir, 'depth.png')))
     workspace_mask = np.array(Image.open(os.path.join(data_dir, 'workspace_mask.png')))
-    return color, depth, workspace_mask
 
-def get_and_process_data(cfgs, color, depth, workspace_mask):
-    data_dir = cfgs.data_dir
-
-    # load data
     meta = scio.loadmat(os.path.join(data_dir, 'meta.mat'))
     intrinsic = meta['intrinsic_matrix']
     factor_depth = meta['factor_depth']
+    return color, depth, workspace_mask, intrinsic, factor_depth
 
+def get_and_process_data(cfgs, color, depth, workspace_mask, intrinsic, factor_depth):
     # generate cloud
     height, width = depth.shape
     camera = CameraInfo(float(width), float(height), intrinsic[0][0], intrinsic[1][1], intrinsic[0][2], intrinsic[1][2], factor_depth)
@@ -110,12 +107,11 @@ def vis_grasps(gg, cloud):
 
 def demo(cfgs):
     net = get_net(cfgs)
-    color, depth, workspace_mask = get_data(cfgs.data_dir)
-    end_points, cloud = get_and_process_data(cfgs, color, depth, workspace_mask)
+    color, depth, workspace_mask, intrinsic, factor_depth = get_data(cfgs.data_dir)
+    end_points, cloud = get_and_process_data(cfgs, color, depth, workspace_mask, intrinsic, factor_depth)
     gg = get_grasps(net, end_points)
     if cfgs.collision_thresh > 0:
         gg = collision_detection(gg, np.array(cloud.points), cfgs=cfgs)
-    import pdb; pdb.set_trace()
     vis_grasps(gg, cloud)
 
 if __name__=='__main__':
