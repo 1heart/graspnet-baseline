@@ -28,8 +28,7 @@ def get_net(cfgs):
     # Init the model
     net = GraspNet(input_feature_dim=0, num_view=cfgs.num_view, num_angle=12, num_depth=4,
             cylinder_radius=0.05, hmin=-0.02, hmax_list=[0.01,0.02,0.03,0.04], is_training=False)
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    net.to(device)
+    net.to(cfgs.device)
     # Load checkpoint
     checkpoint = torch.load(cfgs.checkpoint_path)
     net.load_state_dict(checkpoint['model_state_dict'])
@@ -60,6 +59,9 @@ def get_and_process_data(cfgs, color, depth, workspace_mask, intrinsic, factor_d
     cloud_masked = cloud[mask]
     color_masked = color[mask]
 
+    return process_data(cfgs, cloud_masked, color_masked)
+
+def process_data(cfgs, cloud_masked, color_masked):
     # sample points
     if len(cloud_masked) >= cfgs.num_point:
         idxs = np.random.choice(len(cloud_masked), cfgs.num_point, replace=False)
@@ -76,8 +78,7 @@ def get_and_process_data(cfgs, color, depth, workspace_mask, intrinsic, factor_d
     cloud.colors = o3d.utility.Vector3dVector(color_masked.astype(np.float32))
     end_points = dict()
     cloud_sampled = torch.from_numpy(cloud_sampled[np.newaxis].astype(np.float32))
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    cloud_sampled = cloud_sampled.to(device)
+    cloud_sampled = cloud_sampled.to(cfgs.device)
     end_points['point_clouds'] = cloud_sampled
     end_points['cloud_colors'] = color_sampled
 
