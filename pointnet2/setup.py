@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 from setuptools import setup
+from setuptools import find_packages
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 import glob
 import os
@@ -15,8 +16,11 @@ _ext_sources = glob.glob("{}/src/*.cpp".format(_ext_src_root)) + glob.glob(
 )
 _ext_headers = glob.glob("{}/include/*".format(_ext_src_root))
 
+
 setup(
     name='pointnet2',
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     ext_modules=[
         CUDAExtension(
             name='pointnet2._ext',

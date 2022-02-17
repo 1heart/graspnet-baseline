@@ -63,4 +63,6 @@ setup(
     description="KNN implement in Pytorch 1.0 including both cpu version and gpu version",
     ext_modules=get_extensions(),
     cmdclass={"build_ext": torch.utils.cpp_extension.BuildExtension},
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
 )
