@@ -1,0 +1,33 @@
+name: graspnet-baseline
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - pcl
+  - ninja
+  - pillow
+  - gdown
+  - gcc_linux-64=8.5.0
+  - gxx_linux-64=8.5.0
+  - ffmpeg
+  - opencv=4.5.5=py38h578d9bd_6
+  - libopencv=4.5.5=py38h9b278ad_6
+  - wandb
+  - pybind11
+  - librealsense
+  - jupyterlab
+
+  - pytorch=1.10.2
+  - cudatoolkit=10.2
+  - tensorboard
+  - numpy
+  - scipy
+  - Pillow
+  - tqdm
+
+  - pip
+  - pip:
+    - graspnetAPI
+    - open3d
+    - grpcio-tools
