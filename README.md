@@ -31,7 +31,7 @@ pip install ./knn ./pointnet2
 
 Install:
 ```bash
-pip install .
+pip install -e .
 ```
 
 ## Tolerance Label Generation
