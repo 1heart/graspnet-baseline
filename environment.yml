@@ -19,6 +19,7 @@ dependencies:
   - jupyterlab
 
   - pytorch=1.11.0
+  - pytorch-mutex=cuda
   - cudatoolkit=10.2
   - tensorboard
   - numpy
