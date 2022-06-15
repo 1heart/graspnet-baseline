@@ -1,4 +1,4 @@
-name: graspnet-baseline
+name: mrp_grasp_server
 channels:
   - pytorch
   - conda-forge
