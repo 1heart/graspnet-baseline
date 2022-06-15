@@ -18,9 +18,9 @@ dependencies:
   - librealsense
   - jupyterlab
 
-  - pytorch=1.11.0
+  - pytorch=1.11.0=py3.8_cuda11.3_cudnn8.2.0_0
   - pytorch-mutex=1.0=cuda
-  - cudatoolkit=10.2
+  - cudatoolkit=11.3
   - tensorboard
   - numpy
   - scipy
