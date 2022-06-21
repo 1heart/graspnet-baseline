@@ -61,7 +61,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint_path', default="../../data/graspnet/checkpoint-rs.tar", help='Model checkpoint path')
-    parser.add_argument('--data_dir', type=str, default="doc/example_data", help='Data directory')
     parser.add_argument('--num_point', type=int, default=20000, help='Point Number [default: 20000]')
     parser.add_argument('--num_view', type=int, default=300, help='View Number [default: 300]')
     parser.add_argument('--collision_thresh', type=float, default=0.01, help='Collision Threshold in collision detection [default: 0.01]')
