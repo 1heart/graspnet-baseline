@@ -23,7 +23,7 @@ dependencies:
   - cudatoolkit=11.3
   - tensorboard
   - numpy
-  - scipy
+  - scipy=1.7.3
   - Pillow
   - tqdm
 
