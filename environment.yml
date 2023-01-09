@@ -22,7 +22,7 @@ dependencies:
   - pytorch-mutex=1.0=cuda
   - cudatoolkit=11.3
   - tensorboard
-  - numpy
+  - numpy=1.23.5
   - scipy=1.7.3
   - Pillow
   - tqdm
